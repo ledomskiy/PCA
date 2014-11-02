@@ -43,15 +43,8 @@ public class PCATest
         String[] rowHeaders;
         ArrayList<String> columnHeadersAL = new ArrayList<String>();
         String[] columnHeaders;
-        //где находится файл с исходными данными
-//        pathToFile = "D://FROM_NOTEBOOK//asu//book//diplom//DataExamples//journal.txt";
-//        pathToFile = "D://FROM_NOTEBOOK//asu//book//diplom//DataExamples//faces.txt";
-//        pathToFile = "D://FROM_NOTEBOOK//asu//book//diplom//DataExamples//test1.txt";
-//        pathToFile = "D://FROM_NOTEBOOK//asu//book//diplom//DataExamples//batsdataset.txt";
-//        pathToFolder = "D://FROM_NOTEBOOK//asu//book//diplom//DataExamples//elibrary2011groupAsChinese//";
-//        pathToFolder = "D://FROM_NOTEBOOK//asu//book//diplom//DataExamples//ГруппировкаКакКитайцыЖурналыВходящиеВОднуГруппу//";
-        pathToFolder = "D://FROM_NOTEBOOK//asu//book//diplom//DataExamples//ЕстественнонаучныеГуманитарные//";
-        fileName = "resultDatatable.csv";
+        pathToFolder = "//home//lpa//repos//git//PCA_JInterval//DataExamples//";
+        fileName = "ELibraryAsChinese.csv";
         pathToFile = pathToFolder + fileName;
 //        AbstractGetMatrix source = new GetMatrixFromFile(pathToFile);
         ReadMatrixFromCSVFile source = new ReadMatrixFromCSVFile(pathToFile);

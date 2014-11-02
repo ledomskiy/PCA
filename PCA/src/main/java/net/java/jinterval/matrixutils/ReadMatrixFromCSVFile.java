@@ -73,7 +73,7 @@ public class ReadMatrixFromCSVFile {
         String buffer = "";
         //если файл содержит заголовки, пропускам первую строку
         
-        Scanner scanner = new Scanner(sourceFile,"Cp1251");
+        Scanner scanner = new Scanner(sourceFile,"UTF8");
         String lineDelimiters = "";
         lineDelimiters = lineDelimiters + symbolLineSeparator;
         scanner.useDelimiter(lineDelimiters);
