@@ -8,10 +8,9 @@ import net.java.jinterval.interval.Interval;
 public class VPCA extends AbstractPCA {
     public VPCA(Interval[][] datatable){
         super(datatable);
-        this.countPC = 2;
     }
-    public VPCA(Interval[][] datatable, int countPC, WeightingSchemes weightingScheme){
-        super(datatable, countPC,  weightingScheme);
+    public VPCA(Interval[][] datatable, WeightingSchemes weightingScheme){
+        super(datatable, weightingScheme);
     }
     //квадрат нормы - в этом методе это не есть скалярное произведение вектора на себя
     protected double squareNormVector(int indexColumn){

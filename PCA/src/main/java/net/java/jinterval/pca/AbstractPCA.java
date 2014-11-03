@@ -19,8 +19,6 @@ import org.apache.commons.math3.linear.RealVector;
  * @author lpa
  */
 abstract public class AbstractPCA {
-    //количество главных компонент
-    protected int countPC;
     //количество наблюдений
     protected int countRows;
     //размерность вектора признаков
@@ -60,11 +58,11 @@ abstract public class AbstractPCA {
         if(countRows > 0){
             countColumns = datatable[0].length;
             weights = new double[countRows];
+        }else{
+            countColumns = 0;
         }
         //устанавливаем схему взвешивания
         weightingScheme = WeightingSchemes.EqualWeight;
-        //weightingScheme = WeightingSchemes.ProportionalVolume;
-//        weightingScheme = WeightingSchemes.InverselyProportionalVolume;
         //устанавливаем формат вывода чисел
         numberFormat = NumberFormat.getInstance();
         numberFormat.setMaximumFractionDigits(3);
@@ -72,15 +70,16 @@ abstract public class AbstractPCA {
         numberFormat.setMinimumFractionDigits(3);
         
     }
-    AbstractPCA(Interval[][] datatable, int countPC, WeightingSchemes weightingScheme){
+    AbstractPCA(Interval[][] datatable, WeightingSchemes weightingScheme){
         this.datatable = datatable;
-        this.countPC = countPC;
         //количество наблюдений
         countRows = datatable.length;
         //если есть хоть одно наблюдение
         if(countRows > 0){
             countColumns = datatable[0].length;
             weights = new double[countRows];
+        }else{
+            countColumns = 0;
         }
         //устанавливаем схему взвешивания
         this.weightingScheme = weightingScheme;
@@ -98,7 +97,7 @@ abstract public class AbstractPCA {
         for(int i=0; i<countColumns; i++){
             //вставляем новую строчку в матрицу нагрузок
             loadingsMatrix.add(new ArrayList<Double>());
-            for(int j=0; j<countPC; j++){
+            for(int j=0; j<countColumns; j++){
                 loadingsMatrix.get(i).add(eigenDecomposition.getEigenvector(j).getEntry(i));
             }
         }
@@ -108,25 +107,11 @@ abstract public class AbstractPCA {
         for(int i=0; i<countRows; i++){
             //добавляем новую строку в матрицу счетов
             scoresMatrix.add(new ArrayList<Interval>());
-            for(int j=0; j<countPC; j++){
+            for(int j=0; j<countColumns; j++){
                 scoresMatrix.get(i).add(getProjectionOnPC(i, j, eigenDecomposition));
             }
         }
         
-        
-        
-        
-        ///////////////////////////      TEST ALPHA      ///////////////////////////
-//        System.out.println("\n\n########################## TEST ALPHA ##########################");
-//        //считаем проекции на новые координаты
-//        for(int i=0; i<countRows; i++){
-//            //добавляем новую строку в матрицу счетов
-//            scoresMatrix.add(new ArrayList<Interval>());
-//            for(int j=0; j<countPC; j++){
-//                getProjectionOnPCWithAlpha(i, j, eigenDecomposition);
-//            }
-//        }
-//        System.out.println("########################## END TEST ALPHA ##########################");
     }
 
     public double[] getContributionRates() {
@@ -154,9 +139,9 @@ abstract public class AbstractPCA {
     }
     //возвращает матрицу счетов
     public Interval[][] getScoresMatrix(){
-        Interval[][] resultScoresMatrix = new Interval[countRows][countPC];
+        Interval[][] resultScoresMatrix = new Interval[countRows][countColumns];
         for(int i=0; i<countRows; i++){
-            for(int j=0; j<countPC; j++){
+            for(int j=0; j<countColumns; j++){
                 resultScoresMatrix[i][j] = scoresMatrix.get(i).get(j);
             }
         }
@@ -164,9 +149,9 @@ abstract public class AbstractPCA {
     }
     //возвращает матрицу нагрузок
     public double[][] getLoadingsMatrix(){
-        double[][] resultLoadingsMatrix = new double[countColumns][countPC];
+        double[][] resultLoadingsMatrix = new double[countColumns][countColumns];
         for(int i=0; i< countColumns; i++){
-            for(int j=0; j<countPC; j++){
+            for(int j=0; j<countColumns; j++){
                 resultLoadingsMatrix[i][j] = loadingsMatrix.get(i).get(j);
             }
         }
@@ -430,127 +415,6 @@ abstract public class AbstractPCA {
         return result;
     }
     
-    
-    
-    protected SetInterval getProjectionOnPCWithAlpha(int numRow, int numPC, EigenDecomposition eigenDecomposition){
-        System.out.println("\nnumPC = " + numPC + "\nnumRow = " + numRow);
-        //нижнее и верхнее значение результирующего интервала
-        double infValue, supValue;
-        ArrayRealVector centroidAllData = getCentroidAllData();
-        System.out.print("Centroid All Data:");
-        System.out.print(" (");
-        System.out.print(numberFormat.format(centroidAllData.getEntry(0)) );
-        for(int i=1; i<centroidAllData.getDimension(); i++){
-            System.out.print("; " + numberFormat.format(centroidAllData.getEntry(i)) );
-        }
-        System.out.println(")");
-        
-        
-        //вычисляем количество вершин в гиперкубе
-        int countVertex = 1;
-        for(int i=0; i<countColumns; i++){
-            countVertex *= 2;
-        }
-        //массив вершин гиперкуба
-        ArrayRealVector[] allVertexOfHypercube = new ArrayRealVector[countVertex];
-        //инициализируем массив вершин гиперкуба
-        for(int i=0; i<countVertex; i++){
-            allVertexOfHypercube[i] = new ArrayRealVector(countColumns);
-        }
-        //текущий номер вершины
-        int currentNumberVertex;
-        //добываем поочереди все вершины гиперкуба
-        for(int i=0; i<countVertex; i++){
-            currentNumberVertex = i;
-            //для каждого столбца определяемся брать inf или sup
-            for(int j=0; j<countColumns; j++){
-                if(currentNumberVertex%2 == 0){
-                    allVertexOfHypercube[i].setEntry(j, datatable[numRow][j].doubleInf());
-                }else{
-                    allVertexOfHypercube[i].setEntry(j, datatable[numRow][j].doubleSup());
-                }
-                //переходим к следующей позиции
-                currentNumberVertex = (int)Math.floor((double)currentNumberVertex/2);
-            }
-        }
-        
-        //собственный вектор, на который будем искать проекцию
-        RealVector eigenVector = eigenDecomposition.getEigenvector(numPC);        
-        //перебираем вершины гиперкуба, находим проекции на главные компоненты
-        double projection[] = new double[countVertex];
-        double alpha[] = new double[countVertex];
-        ArrayRealVector diffVector = new ArrayRealVector(countColumns);
-        
-        //массив векторов, соединяющих i-ю вершину гиперкуба с центроидом всех данных
-        ArrayRealVector[] arrayDiffVectors = new ArrayRealVector[countVertex];
-        //инициализируем массив
-        for(int i=0; i<countVertex; i++){
-            arrayDiffVectors[i] = new ArrayRealVector(countColumns);
-        }
-        
-        for(int i=0; i<countVertex; i++){
-            //находим проекцию на собственный вектор
-            projection[i] = allVertexOfHypercube[i].getNorm()*allVertexOfHypercube[i].cosine(eigenVector);
-            //находим норму разности векторов
-            for(int j=0; j<countColumns; j++){
-                diffVector.setEntry(j, allVertexOfHypercube[i].getEntry(j) - centroidAllData.getEntry(j));
-            }
-            //сохраняем diffVector в массив
-            for(int j=0; j<countColumns; j++){
-                arrayDiffVectors[i].setEntry(j, diffVector.getEntry(j));
-            }
-            //считаем альфа
-            alpha[i] = projection[i]/diffVector.getNorm();
-            //находим квадрат alpha
-            alpha[i] *= alpha[i];            
-        }       
-        
-        for(int i=0; i<countVertex; i++){
-            //выводим координаты вершины
-            System.out.print("(" + numberFormat.format(allVertexOfHypercube[i].getEntry(0)));
-            for(int j=1; j<allVertexOfHypercube[i].getDimension();j++){
-                System.out.print("; " + numberFormat.format(allVertexOfHypercube[i].getEntry(j)));
-            }
-            System.out.print(") : ");
-            System.out.println("ProjOnPC = " + numberFormat.format(projection[i]) + " Alpha = " + numberFormat.format(alpha[i]));
-        }
-        
-        
-        
-        //возюкаемся с Inertia
-        //see DouzalPCA page 16
-        double inertiaPC = 0.0;
-        //суммируем квадраты проекций
-        for(int i=0; i<projection.length; i++){
-            inertiaPC += Math.pow(projection[i], 2.0);
-        }
-        inertiaPC = inertiaPC*weights[numRow]/eigenDecomposition.getRealEigenvalue(numPC);
-        
-        System.out.println("InertiaPC(i="+numRow+", v="+numPC+") = " + numberFormat.format(inertiaPC));
-        
-        //DouzalPCA page16 equation (6.4)
-        double inertia = 0.0;
-        //суммируем квадраты расстояний
-        
-        double distance;
-        for(int i=0; i<countVertex; i++){
-            distance = arrayDiffVectors[i].getNorm();
-            inertia += distance * distance;
-        }
-        //домножаем на вес
-        inertia *= weights[numRow];
-        //считаем Itotal
-        double Itotal = 0.0;
-        for(int i=0; i<countPC; i++){
-            Itotal += eigenDecomposition.getRealEigenvalue(i);
-        }
-        inertia /= Itotal;
-        System.out.println("Inertia(i=" +numRow+") = " + numberFormat.format(inertia));       
-        
-        
-        
-        return null;
-    }
     
     public void solve(){
         //создаем матрицу счетов

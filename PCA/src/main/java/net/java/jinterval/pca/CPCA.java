@@ -8,10 +8,9 @@ import net.java.jinterval.interval.Interval;
 public class CPCA extends AbstractPCA {
     public CPCA(Interval[][] datatable){
         super(datatable);
-        this.countPC = 2;
     }
-    public CPCA(Interval[][] datatable, int countPC, WeightingSchemes weightingScheme){
-        super(datatable, countPC,  weightingScheme);
+    public CPCA(Interval[][] datatable, WeightingSchemes weightingScheme){
+        super(datatable, weightingScheme);
     }
     //квадрат нормы столбца
     protected double squareNormVector(int indexColumn){

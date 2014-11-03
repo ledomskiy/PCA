@@ -59,7 +59,7 @@ public class PCATest
         
         String usingMethod = "CIPCA";
         String usingWeightedType = "ProportionalVolume";
-        AbstractPCA pca = new CIPCA(matrix, 11, AbstractPCA.WeightingSchemes.ProportionalVolume);
+        AbstractPCA pca = new CIPCA(matrix, AbstractPCA.WeightingSchemes.ProportionalVolume);
         pca.solve();
         
             

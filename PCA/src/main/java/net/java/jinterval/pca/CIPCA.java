@@ -7,11 +7,10 @@ import net.java.jinterval.interval.Interval;
  */
 public class CIPCA extends AbstractPCA {
     public CIPCA(Interval[][] datatable){
-        super(datatable);        
-        this.countPC = 2;
+        super(datatable);
     }
-    public CIPCA(Interval[][] datatable, int countPC, WeightingSchemes weightingScheme){
-        super(datatable, countPC,  weightingScheme);
+    public CIPCA(Interval[][] datatable, WeightingSchemes weightingScheme){
+        super(datatable, weightingScheme);
     }
     //квадрат нормы - в этом методе это не есть скалярное произведение вектора на себя
     protected double squareNormVector(int indexColumn){
