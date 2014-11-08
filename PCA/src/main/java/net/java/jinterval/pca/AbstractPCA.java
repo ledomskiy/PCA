@@ -19,6 +19,8 @@ import org.apache.commons.math3.linear.RealVector;
  * @author lpa
  */
 abstract public class AbstractPCA {
+    //количество главных компонент
+    protected Integer countPC;
     //количество наблюдений
     protected int countRows;
     //размерность вектора признаков
@@ -44,7 +46,7 @@ abstract public class AbstractPCA {
     protected double[] weights;
     protected double[] expectedValuesColumns;
     //необходимый процент объяснения общей дисперсии главными компонентами
-    protected Double comulativeContributionRate;
+    protected double comulativeContributionRate;
     protected double[] contributionRates;
     
     //Формат вывода чисел
@@ -56,9 +58,11 @@ abstract public class AbstractPCA {
         countRows = datatable.length;
         //если есть хоть одно наблюдение
         if(countRows > 0){
+            countPC = datatable[0].length;
             countColumns = datatable[0].length;
             weights = new double[countRows];
         }else{
+            countPC = 0;
             countColumns = 0;
         }
         //устанавливаем схему взвешивания
@@ -70,15 +74,17 @@ abstract public class AbstractPCA {
         numberFormat.setMinimumFractionDigits(3);
         
     }
-    AbstractPCA(Interval[][] datatable, WeightingSchemes weightingScheme){
+    AbstractPCA(Interval[][] datatable, int countPC, WeightingSchemes weightingScheme){
         this.datatable = datatable;
         //количество наблюдений
         countRows = datatable.length;
         //если есть хоть одно наблюдение
         if(countRows > 0){
+            this.countPC = countPC;
             countColumns = datatable[0].length;
             weights = new double[countRows];
         }else{
+            this.countPC = 0;
             countColumns = 0;
         }
         //устанавливаем схему взвешивания
@@ -92,12 +98,30 @@ abstract public class AbstractPCA {
         numberFormat.setMinimumFractionDigits(3);
         
     }
+    AbstractPCA(Interval[][] datatable, double cumulativeContributionRate, WeightingSchemes weightingScheme){
+        this.datatable = datatable;
+        countRows = datatable.length;
+        if(countRows > 0){
+            countColumns = datatable[0].length;
+            weights = new double[countRows];
+        }else{
+            countColumns = 0;
+        }
+        this.comulativeContributionRate = cumulativeContributionRate;
+        this.weightingScheme = weightingScheme;
+        //устанавливаем формат вывода чисел
+        numberFormat = NumberFormat.getInstance();
+        numberFormat.setMaximumFractionDigits(3);
+        numberFormat.setMinimumIntegerDigits(1);
+        numberFormat.setMinimumFractionDigits(3);
+        
+    }
     protected void calculateLoadingsMatrix(EigenDecomposition eigenDecomposition) throws OutOfRangeException {
         //заполняем матрицу нагрузок
         for(int i=0; i<countColumns; i++){
             //вставляем новую строчку в матрицу нагрузок
             loadingsMatrix.add(new ArrayList<Double>());
-            for(int j=0; j<countColumns; j++){
+            for(int j=0; j<countPC; j++){
                 loadingsMatrix.get(i).add(eigenDecomposition.getEigenvector(j).getEntry(i));
             }
         }
@@ -107,11 +131,10 @@ abstract public class AbstractPCA {
         for(int i=0; i<countRows; i++){
             //добавляем новую строку в матрицу счетов
             scoresMatrix.add(new ArrayList<Interval>());
-            for(int j=0; j<countColumns; j++){
+            for(int j=0; j<countPC; j++){
                 scoresMatrix.get(i).add(getProjectionOnPC(i, j, eigenDecomposition));
             }
         }
-        
     }
 
     public double[] getContributionRates() {
@@ -141,7 +164,7 @@ abstract public class AbstractPCA {
     public Interval[][] getScoresMatrix(){
         Interval[][] resultScoresMatrix = new Interval[countRows][countColumns];
         for(int i=0; i<countRows; i++){
-            for(int j=0; j<countColumns; j++){
+            for(int j=0; j<countPC; j++){
                 resultScoresMatrix[i][j] = scoresMatrix.get(i).get(j);
             }
         }
@@ -151,14 +174,14 @@ abstract public class AbstractPCA {
     public double[][] getLoadingsMatrix(){
         double[][] resultLoadingsMatrix = new double[countColumns][countColumns];
         for(int i=0; i< countColumns; i++){
-            for(int j=0; j<countColumns; j++){
+            for(int j=0; j<countPC; j++){
                 resultLoadingsMatrix[i][j] = loadingsMatrix.get(i).get(j);
             }
         }
         return resultLoadingsMatrix;
     }
     
-    //вычичляет объем numberRow-го гиперкуба
+    //вычиcляет объем numberRow-го гиперкуба
     protected double calculateVolumeHypercube(int numberRow){
         double result = 0.0;
         double Eps = 1.0e-10;
@@ -463,13 +486,6 @@ abstract public class AbstractPCA {
         }
         System.out.println();
         
-//        //сортируем по убыванию собственные значения
-//        HashMap<Integer, Integer> indexesEValues = getIndexesEValues(realEigenvalues);
-//        //отсортированные собственные значения
-//        System.out.println("\nOrdered eigen values:");
-//        for(int i=0; i<realEigenvalues.length; i++){
-//            System.out.println(i +  " -> " + indexesEValues.get(i));
-//        }
         //выводим собственные вектора для каждого собственного значения
         System.out.println("\nEigen vectors:");
         for(int i=0; i<realEigenvalues.length; i++){
@@ -488,10 +504,15 @@ abstract public class AbstractPCA {
         for(int i=0; i<realEigenvalues.length; i++){
             contributionRates[i] = realEigenvalues[i]*100/sumAllEigenValues;
             currenComulativeContributionRate += realEigenvalues[i]*100/sumAllEigenValues;
-//            System.out.println("Eigen value " + numberFormat.format(realEigenvalues[i]) + " given " + 
-//                    numberFormat.format(realEigenvalues[i]*100/sumAllEigenValues) + "% information" +
-//                    " CCR = " + currenComulativeContributionRate);
+            if (countPC == null &&
+                currenComulativeContributionRate >= this.comulativeContributionRate){
+                countPC = i+1;
+            } 
             System.out.println(currenComulativeContributionRate);
+        }
+        
+        if (countPC == null){
+            countPC = countColumns;
         }
 //        
 //        System.out.println("ComulativeContributionRate");

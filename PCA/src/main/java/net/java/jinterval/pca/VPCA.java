@@ -9,8 +9,12 @@ public class VPCA extends AbstractPCA {
     public VPCA(Interval[][] datatable){
         super(datatable);
     }
-    public VPCA(Interval[][] datatable, WeightingSchemes weightingScheme){
-        super(datatable, weightingScheme);
+    public VPCA(Interval[][] datatable, int countPC, WeightingSchemes weightingScheme){
+        super(datatable, countPC, weightingScheme);
+    }
+    public VPCA(Interval[][] datatable, double cumulativeContributionRate, 
+                 WeightingSchemes weightingScheme){
+        super(datatable, cumulativeContributionRate, weightingScheme);
     }
     //квадрат нормы - в этом методе это не есть скалярное произведение вектора на себя
     protected double squareNormVector(int indexColumn){

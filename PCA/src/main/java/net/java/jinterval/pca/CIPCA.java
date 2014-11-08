@@ -9,8 +9,12 @@ public class CIPCA extends AbstractPCA {
     public CIPCA(Interval[][] datatable){
         super(datatable);
     }
-    public CIPCA(Interval[][] datatable, WeightingSchemes weightingScheme){
-        super(datatable, weightingScheme);
+    public CIPCA(Interval[][] datatable, int countPC, WeightingSchemes weightingScheme){
+        super(datatable, countPC, weightingScheme);
+    }
+    public CIPCA(Interval[][] datatable, double cumulativeContributionRate, 
+                 WeightingSchemes weightingScheme){
+        super(datatable, cumulativeContributionRate, weightingScheme);
     }
     //квадрат нормы - в этом методе это не есть скалярное произведение вектора на себя
     protected double squareNormVector(int indexColumn){
