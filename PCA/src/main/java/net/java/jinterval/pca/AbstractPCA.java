@@ -162,7 +162,7 @@ abstract public class AbstractPCA {
     }
     //возвращает матрицу счетов
     public Interval[][] getScoresMatrix(){
-        Interval[][] resultScoresMatrix = new Interval[countRows][countColumns];
+        Interval[][] resultScoresMatrix = new Interval[countRows][countPC];
         for(int i=0; i<countRows; i++){
             for(int j=0; j<countPC; j++){
                 resultScoresMatrix[i][j] = scoresMatrix.get(i).get(j);
@@ -172,7 +172,7 @@ abstract public class AbstractPCA {
     }
     //возвращает матрицу нагрузок
     public double[][] getLoadingsMatrix(){
-        double[][] resultLoadingsMatrix = new double[countColumns][countColumns];
+        double[][] resultLoadingsMatrix = new double[countColumns][countPC];
         for(int i=0; i< countColumns; i++){
             for(int j=0; j<countPC; j++){
                 resultLoadingsMatrix[i][j] = loadingsMatrix.get(i).get(j);

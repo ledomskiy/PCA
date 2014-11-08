@@ -68,8 +68,8 @@ public class PCATest
         double[] contributionRates;
         contributionRates = pca.getContributionRates();
         
-        //WriteMatrixIntoCSVFile.writeScoresMatrix(pathToFolder + "elibrary2011SM_"+usingMethod+"_"+usingWeightedType+".csv", sm, rowHeaders, contributionRates, ".");
-        //WriteMatrixIntoCSVFile.writeLoadingsMatrix1(pathToFolder + "elibrary2011LM_"+usingMethod+"_"+usingWeightedType+".csv", lm, columnHeaders, contributionRates,".");
+        WriteMatrixIntoCSVFile.writeScoresMatrix(pathToFolder + "elibrary2011SM_"+usingMethod+"_"+usingWeightedType+".csv", sm, rowHeaders, contributionRates, ".");
+        WriteMatrixIntoCSVFile.writeLoadingsMatrix1(pathToFolder + "elibrary2011LM_"+usingMethod+"_"+usingWeightedType+".csv", lm, columnHeaders, contributionRates,".");
         
         //////////////////////    READ FROM CSV FILE      //////////////////////////
 //        ReadMatrixFromCSVFile sourceCSV = new ReadMatrixFromCSVFile("D://FROM_NOTEBOOK//asu//book//diplom//DataExamples//elibrary2001группировкаПоГРНТИ.csv");
